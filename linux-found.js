@@ -1,27 +1,9 @@
 var casper = require('casper').create({
-	/* verbose: true,
-	logLevel: 'debug' */
+	verbose: true,
+	logLevel: 'debug'
 });
-
-var pages = [];
-var currentPage = 0;
-
-function addPages(page) {
-	this.then(function() {
-		var found = this.evaluate(searchLinks);
-		this.echo(found.length + " pages found on " + page);
-		pages = pages.concat(found);
-	});
-}
-
-function searchPages() {
-	var filter, map;
-	filter = Array.prototype.filter;
-	map = Array.prototype.map;
-	return map.call(filter.call(document.querySelectorAll('id="toc"'), function(a) {
-		return (/^http:\/\/)
-	}))
-}
+var nextLink = "#tobj43169 a"; 
+var prevLink = "#tobj43167 a";
 
 casper.setFilter('page.confirm', function(message) {
     self.received = message;
@@ -29,7 +11,7 @@ casper.setFilter('page.confirm', function(message) {
     return true;
 });
 
-/* casper.on('error', function(msg,backtrace) {
+casper.on('error', function(msg,backtrace) {
   this.echo("=========================");
   this.echo("ERROR:");
   this.echo(msg);
@@ -43,16 +25,35 @@ casper.on("page.error", function(msg, backtrace) {
   this.echo(msg);
   this.echo(backtrace);
   this.echo("=========================");
-}); */
+}); 
 
-casper.options.viewportSize = {width: 1600, height: 950};
+casper.options.viewportSize = {width: 1000, height: 750};
 
 casper.start('', function(){
-
+	this.capture('linux.png');
 });
 
 casper.then(function() {
-	this.capture('linux.png');
+	casper.waitForSelector(nextLink, function() {
+		if (this.visible(nextLink)) {
+        this.click(nextLink);
+        this.wait(2000);
+    }   else {
+        this.echo("END");
+    	}
+	});
 });
+
+while(true) {
+	var count = []
+	casper.visible(prevLink, function() {
+		this.visible(nextLink, function() {
+			this.capture("linux" + count++ + ".png")
+		})
+		this.click(nextLink);
+		this.wait(2000);
+	})
+};
+
 
 casper.run();
